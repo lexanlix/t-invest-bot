@@ -3,7 +3,6 @@ package log
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -82,25 +81,13 @@ func (a *Adapter) Enabled(level Level) bool {
 	return a.level.Enabled(level)
 }
 
+//nolint:wrapcheck
 func (a *Adapter) Sync() error {
 	return a.logger.Sync()
 }
 
 func (a *Adapter) Config() Config {
 	return a.cfg
-}
-
-func StdLoggerWithLevel(adapter Logger, level Level, withFields ...Field) *log.Logger {
-	kitAdapter, ok := adapter.(*Adapter)
-	if !ok {
-		panic(fmt.Errorf("adapter must be a [%T], got [%T]", &Adapter{}, adapter))
-	}
-	logger := kitAdapter.logger.With(withFields...)
-	stdLogger, err := zap.NewStdLogAt(logger, level)
-	if err != nil {
-		panic(err)
-	}
-	return stdLogger
 }
 
 func castString(v any) string {

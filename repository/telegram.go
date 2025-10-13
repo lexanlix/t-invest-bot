@@ -23,6 +23,7 @@ func NewTgRepository(bot *tgbotapi.BotAPI, chatId int64) *TgRepository {
 	}
 }
 
+//nolint:gosmopolitan
 func (r *TgRepository) SendOperations(operations []entity.Operation) error {
 	msg := "Операции по счету:\n"
 
@@ -30,7 +31,7 @@ func (r *TgRepository) SendOperations(operations []entity.Operation) error {
 		opMsg := op.Type
 
 		if op.HasInstrument {
-			opMsg += fmt.Sprintf("\n%s", op.Instrument.Ticker)
+			opMsg += fmt.Sprintf("\n%s", op.Instrument.GetTicker())
 		}
 
 		if op.Quantity != 0 {
@@ -57,9 +58,10 @@ func (r *TgRepository) SendOperations(operations []entity.Operation) error {
 }
 
 func formatMoney(v *investapi.MoneyValue) string {
-	return fmt.Sprintf("%d.%s %s", v.Units, formatNano(v.Nano, v.Nano < 0), v.Currency)
+	return fmt.Sprintf("%d.%s %s", v.GetUnits(), formatNano(v.GetNano(), v.GetNano() < 0), v.GetCurrency())
 }
 
+//nolint:mnd
 func formatNano(nano int32, isNeg bool) string {
 	if isNeg {
 		nano = -nano

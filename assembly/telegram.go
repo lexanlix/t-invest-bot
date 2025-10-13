@@ -200,7 +200,7 @@ func (t Telegram) getInvestToken(ctx context.Context, user User, token string) e
 
 	accNameById := make(map[string]string)
 	for _, acc := range accounts {
-		accNameById[acc.Id] = acc.Name
+		accNameById[acc.GetId()] = acc.GetName()
 	}
 	user.data.Invest.AccountNameById = accNameById
 
@@ -265,7 +265,7 @@ func createAccountsMarkup(accounts []*investapi.Account) tgbotapi.InlineKeyboard
 	accRows := make([][]tgbotapi.InlineKeyboardButton, 0)
 	for _, acc := range accounts {
 		accRows = append(accRows, tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(acc.Name, acc.Id),
+			tgbotapi.NewInlineKeyboardButtonData(acc.GetName(), acc.GetId()),
 		))
 	}
 

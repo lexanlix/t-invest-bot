@@ -1,3 +1,4 @@
+//nolint:mnd,containedctx
 package assembly
 
 import (

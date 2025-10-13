@@ -1,5 +1,6 @@
 package entity
 
+//nolint:gochecknoglobals,gosec
 var (
 	StartCommand = "/start"
 

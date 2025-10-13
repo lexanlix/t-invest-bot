@@ -26,6 +26,7 @@ type TgRepo interface {
 	SendOperations(operations []entity.Operation) error
 }
 
+//nolint:containedctx
 type Service struct {
 	cancelCtx             context.Context
 	logger                log.Logger
@@ -52,28 +53,6 @@ func (s *Service) StartTracing() {
 	s.doneChan = make(chan struct{})
 	go s.run()
 	s.logger.Info(s.cancelCtx, "started tracing account", log.String("accountId", s.accountId))
-}
-
-func (s *Service) run() {
-	t := time.NewTicker(s.checkOperationsPeriod)
-	defer t.Stop()
-
-	for {
-		select {
-		case <-s.cancelCtx.Done():
-			close(s.doneChan)
-			return
-		case _, isOpen := <-s.doneChan:
-			if !isOpen {
-				return
-			}
-		case <-t.C:
-			err := s.FetchOperations()
-			if err != nil {
-				s.logger.Error(s.cancelCtx, "send operations", log.Any("error", err))
-			}
-		}
-	}
 }
 
 func (s *Service) PauseTracing() {
@@ -112,6 +91,28 @@ func (s *Service) FetchOperations() error {
 	return nil
 }
 
+func (s *Service) run() {
+	t := time.NewTicker(s.checkOperationsPeriod)
+	defer t.Stop()
+
+	for {
+		select {
+		case <-s.cancelCtx.Done():
+			close(s.doneChan)
+			return
+		case _, isOpen := <-s.doneChan:
+			if !isOpen {
+				return
+			}
+		case <-t.C:
+			err := s.FetchOperations()
+			if err != nil {
+				s.logger.Error(s.cancelCtx, "send operations", log.Any("error", err))
+			}
+		}
+	}
+}
+
 func (s *Service) formatOperations(operations []*pb.Operation) ([]entity.Operation, error) {
 	result := make([]entity.Operation, 0)
 
@@ -123,16 +124,16 @@ func (s *Service) formatOperations(operations []*pb.Operation) ([]entity.Operati
 
 		hasInstrument := true
 		switch {
-		case len(op.Figi) != 0:
-			instrument, err = s.investRepo.GetInstrumentByFigi(op.Figi)
+		case len(op.GetFigi()) != 0:
+			instrument, err = s.investRepo.GetInstrumentByFigi(op.GetFigi())
 			if err != nil {
-				return nil, errors.WithMessagef(err, "get instrument by figi '%s', op.Type '%s'", op.Figi, op.Type)
+				return nil, errors.WithMessagef(err, "get instrument by figi '%s', op.Type '%s'", op.GetFigi(), op.GetType())
 			}
 
-		case len(op.InstrumentUid) != 0:
-			instrument, err = s.investRepo.GetInstrumentByUid(op.InstrumentUid)
+		case len(op.GetInstrumentUid()) != 0:
+			instrument, err = s.investRepo.GetInstrumentByUid(op.GetInstrumentUid())
 			if err != nil {
-				return nil, errors.WithMessagef(err, "get instrument by figi '%s', op.Type '%s'", op.Figi, op.Type)
+				return nil, errors.WithMessagef(err, "get instrument by figi '%s', op.Type '%s'", op.GetFigi(), op.GetType())
 			}
 		default:
 			hasInstrument = false

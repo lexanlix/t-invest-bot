@@ -24,7 +24,8 @@ func Encrypt(key []byte, data []byte) ([]byte, error) {
 
 	// Генерируем случайный nonce
 	nonce := make([]byte, gcm.NonceSize())
-	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+	_, err = io.ReadFull(rand.Reader, nonce)
+	if err != nil {
 		return nil, errors.WithMessage(err, "read nonce")
 	}
 

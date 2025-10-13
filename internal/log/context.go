@@ -1,3 +1,4 @@
+//nolint:gochecknoglobals
 package log
 
 import (
