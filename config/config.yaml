@@ -1,0 +1,16 @@
+Invest:
+  EndPoint: invest-public-api.tbank.ru:443
+  AppName: invest-api-go-sdk
+  DisableResourceExhaustedRetry: false
+  DisableAllRetry: false
+  MaxRetries: 3
+  # TLS Configuration (optional)
+  # TLSCertFile: /path/to/client.crt
+  # TLSKeyFile: /path/to/client.key
+  # TLSCACertFile: /path/to/ca.crt
+  InsecureSkipVerify: true
+TgBot:
+  Debug: false
+Cache:
+  Filepath: users.json
+OperationsTimeout: 60s
