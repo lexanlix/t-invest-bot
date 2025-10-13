@@ -11,9 +11,6 @@ RUN apk add --no-cache tzdata
 RUN cp /usr/share/zoneinfo/Europe/Moscow /etc/localtime
 RUN echo "Europe/Moscow" > /etc/timezone
 
-COPY --from=builder migrate /migrate/migrate
-COPY cmd/migrate/config.yml /migrate/config.yml
-RUN chmod 666 /migrate/config.yml
 
 ARG UID=10001
 RUN adduser \
