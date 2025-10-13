@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	localConfigPath      = "config/config.yaml"
+	localConfigPath      = "conf/config.yaml"
 	botGetUpdatesTimeout = 48 * 60 * 60 // 48 часов
 )
 
