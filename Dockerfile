@@ -28,6 +28,6 @@ WORKDIR /app
 
 ENV app_name_env="t-invest-bot"
 COPY --from=builder main /app/$app_name_env
-COPY /conf/config.yml /app/conf/config.yml
+COPY /conf/config.yaml /app/conf/config.yaml
 
 ENTRYPOINT /app/$app_name_env
