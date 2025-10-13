@@ -48,9 +48,7 @@ func NewBootstrap() *Bootstrap {
 		logger.Fatal(ctx, "read key", log.Any("error", err))
 	}
 
-	tok := os.Getenv("BOT_TOKEN")
-
-	bot, err := tgbotapi.NewBotAPI(tok)
+	bot, err := tgbotapi.NewBotAPI(os.Getenv("BOT_TOKEN"))
 	if err != nil {
 		logger.Fatal(ctx, "create tg bot", log.Any("error", err))
 	}
@@ -118,29 +116,17 @@ func (b *Bootstrap) AddCloser(closer Closer) {
 }
 
 func readAesKey(config *entity.Config) error {
-	file, err := os.OpenFile("key.txt", os.O_RDONLY, 0666)
-	if err != nil {
-		return errors.WithMessage(err, "open key file")
-	}
-	defer file.Close()
-
-	stat, err := file.Stat()
-	if err != nil {
-		return errors.WithMessage(err, "get file stat")
+	keyStr := os.Getenv("AES_KEY")
+	if len(keyStr) == 0 {
+		return errors.New("no AES_KEY env var")
 	}
 
-	fileBytes := make([]byte, stat.Size())
-	_, err = file.Read(fileBytes)
-	if err != nil {
-		return errors.WithMessage(err, "read file bytes")
-	}
-
-	config.AesKey = make([]byte, hex.DecodedLen(len(fileBytes)))
-	_, err = hex.Decode(config.AesKey, fileBytes)
+	key, err := hex.DecodeString(keyStr)
 	if err != nil {
 		return errors.WithMessage(err, "decoding key")
 	}
 
+	config.AesKey = key
 	return nil
 }
 
