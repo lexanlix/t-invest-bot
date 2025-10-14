@@ -1,12 +1,9 @@
-//nolint:mnd,containedctx
 package assembly
 
 import (
 	"context"
 	"encoding/hex"
 	"os"
-	"os/signal"
-	"syscall"
 
 	"t-api/entity"
 	"t-api/internal/log"
@@ -17,15 +14,17 @@ import (
 
 const (
 	localConfigPath      = "conf/config.yaml"
-	botGetUpdatesTimeout = 48 * 60 * 60 // 48 часов
+	botGetUpdatesTimeout = 60
 )
 
+//nolint:containedctx
 type Bootstrap struct {
-	logger  *log.Adapter
+	ctx     context.Context
 	config  *entity.Config
+	logger  *log.Adapter
 	bot     *tgbotapi.BotAPI
 	updates tgbotapi.UpdatesChannel
-	context context.Context
+
 	cancel  context.CancelFunc
 	closers []Closer
 }
@@ -41,7 +40,7 @@ func NewBootstrap() *Bootstrap {
 		panic(errors.WithMessage(err, "create logger"))
 	}
 
-	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
+	ctx, cancel := context.WithCancel(context.Background())
 
 	err = readAesKey(config)
 	if err != nil {
@@ -60,59 +59,56 @@ func NewBootstrap() *Bootstrap {
 	u.Timeout = botGetUpdatesTimeout
 
 	return &Bootstrap{
-		logger:  logger,
+		ctx:     ctx,
 		config:  config,
+		logger:  logger,
 		bot:     bot,
 		updates: bot.GetUpdatesChan(u),
-		context: ctx,
 		cancel:  cancel,
 		closers: make([]Closer, 0),
 	}
 }
 
-func (b *Bootstrap) Logger() *log.Adapter {
-	return b.logger
+func (b *Bootstrap) Context() context.Context {
+	return b.ctx
 }
 
 func (b *Bootstrap) Config() *entity.Config {
 	return b.config
 }
 
+func (b *Bootstrap) Logger() *log.Adapter {
+	return b.logger
+}
+
 func (b *Bootstrap) Bot() *tgbotapi.BotAPI {
 	return b.bot
 }
 
-func (b *Bootstrap) Context() context.Context {
-	return b.context
-}
-
 func (b *Bootstrap) Start(handleUpdate func(context.Context, tgbotapi.Update)) {
-	b.logger.Info(b.context, "tg bot handle started")
+	b.logger.Info(b.ctx, "tg bot handle started")
 	for {
 		select {
 		// stop looping if ctx is cancelled
-		case <-b.context.Done():
+		case <-b.ctx.Done():
 			return
 		// receive update from channel and then handle it
 		case update := <-b.updates:
-			handleUpdate(b.context, update)
+			handleUpdate(b.ctx, update)
 		}
 	}
 }
 
 func (b *Bootstrap) Shutdown() {
-	b.logger.Info(b.context, "starting shutdown")
-
 	for _, closer := range b.closers {
 		closer.Close()
 	}
 
 	b.cancel()
-	b.logger.Info(context.Background(), "shutdown completed")
 }
 
-func (b *Bootstrap) AddCloser(closer Closer) {
-	b.closers = append(b.closers, closer)
+func (b *Bootstrap) AddClosers(closers ...Closer) {
+	b.closers = append(b.closers, closers...)
 }
 
 func readAesKey(config *entity.Config) error {

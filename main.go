@@ -1,12 +1,19 @@
 package main
 
-import "t-api/assembly"
+import (
+	"t-api/assembly"
+	"t-api/internal/shutdown"
+)
 
 func main() {
 	boot := assembly.NewBootstrap()
-	defer boot.Shutdown()
-
 	logger := boot.Logger()
+
+	shutdown.On(func() {
+		logger.Info(boot.Context(), "starting shutdown")
+		boot.Shutdown()
+		logger.Info(boot.Context(), "shutdown completed")
+	})
 
 	logger.Info(boot.Context(), "creating telegram service")
 	tg, err := assembly.NewTelegram(boot.Context(), logger, *boot.Config(), boot.Bot())
@@ -14,6 +21,6 @@ func main() {
 		logger.Fatal(boot.Context(), err)
 	}
 
-	boot.AddCloser(tg)
+	boot.AddClosers(tg)
 	boot.Start(tg.HandleUpdate)
 }
