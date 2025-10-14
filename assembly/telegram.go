@@ -2,7 +2,6 @@ package assembly
 
 import (
 	"context"
-	"time"
 
 	"t-api/entity"
 	"t-api/internal/log"
@@ -273,7 +272,6 @@ func (t Telegram) upUserService(ctx context.Context, user User) error {
 	t.usersCache.Update(user.data.ChatId, user)
 
 	userService.StartTracing()
-	time.Sleep(1 * time.Second)
 
 	keyboardMsg := tgbotapi.NewMessage(user.data.ChatId, entity.StartTracingMsg+" "+user.data.Invest.TracingAccountName)
 	keyboardMsg.ReplyMarkup = createStopButtonMarkup()
