@@ -11,6 +11,8 @@ import (
 	investapi "github.com/russianinvestments/invest-api-go-sdk/proto"
 )
 
+const currencyDecimals = 2
+
 type TgRepository struct {
 	bot    *tgbotapi.BotAPI
 	chatId int64
@@ -62,7 +64,6 @@ func formatMoney(v *investapi.MoneyValue) string {
 	return fmt.Sprintf("%d.%s %s", v.GetUnits(), formatNano(v.GetNano(), v.GetNano() < 0), currency)
 }
 
-//nolint:mnd
 func formatNano(nano int32, isNeg bool) string {
 	if isNeg {
 		nano = -nano
@@ -70,7 +71,7 @@ func formatNano(nano int32, isNeg bool) string {
 
 	strNano := strconv.Itoa(int(nano))
 
-	if len(strNano) < 2 {
+	if len(strNano) < currencyDecimals {
 		return strNano
 	}
 

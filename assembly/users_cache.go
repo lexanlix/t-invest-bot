@@ -1,4 +1,3 @@
-//nolint:mnd
 package assembly
 
 import (
@@ -79,7 +78,7 @@ func (c *Cache) Update(id int64, newUser User) {
 }
 
 func readFromFile(path string, key []byte) (map[int64]User, error) {
-	file, err := os.OpenFile(path, os.O_RDONLY|os.O_CREATE, 0666)
+	file, err := os.OpenFile(path, os.O_RDONLY|os.O_CREATE, os.ModePerm)
 	if err != nil {
 		return nil, errors.WithMessage(err, "open file")
 	}
@@ -123,7 +122,7 @@ func readFromFile(path string, key []byte) (map[int64]User, error) {
 }
 
 func (c *Cache) SaveToFile() error {
-	file, err := os.OpenFile(c.filepath, os.O_WRONLY|os.O_CREATE, 0666)
+	file, err := os.OpenFile(c.filepath, os.O_WRONLY|os.O_CREATE, os.ModePerm)
 	if err != nil {
 		return errors.WithMessage(err, "open file")
 	}
