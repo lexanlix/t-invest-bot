@@ -156,6 +156,31 @@ func (t Telegram) handleCommand(user User, command string) {
 		if err != nil {
 			t.logger.Error(context.Background(), "send keyboard message", log.Any("error", err))
 		}
+	case entity.AccountsButtonCommand:
+		user.data.State = entity.StateGotInvestToken
+		defer t.usersCache.Update(user.data.ChatId, user)
+
+		accounts, err := user.service.GetAccounts()
+		if err != nil {
+			user.data.State = entity.StateUserCreated
+			t.logger.Error(context.Background(), "get accounts", log.Any("error", err))
+			return
+		}
+
+		accNameById := make(map[string]string)
+		for _, acc := range accounts {
+			accNameById[acc.GetId()] = acc.GetName()
+		}
+		user.data.Invest.AccountNameById = accNameById
+
+		accountsMsg := tgbotapi.NewMessage(user.data.ChatId,
+			"Отслеживание счета "+user.data.Invest.TracingAccountName+" приостановлено. Выберите счет")
+		accountsMsg.ReplyMarkup = createAccountsMarkup(accounts)
+
+		_, err = t.bot.Send(accountsMsg)
+		if err != nil {
+			t.logger.Error(context.Background(), "send accounts message", log.Any("error", err))
+		}
 	}
 }
 
@@ -260,7 +285,7 @@ func (t Telegram) upUserService(ctx context.Context, user User) error {
 	return nil
 }
 
-// Создаем сообщение с кнопками: [Название счета]Номер счета(при нажатии)
+// Cообщение с кнопками: [Название счета]Номер счета(при нажатии)
 func createAccountsMarkup(accounts []*investapi.Account) tgbotapi.InlineKeyboardMarkup {
 	accRows := make([][]tgbotapi.InlineKeyboardButton, 0)
 	for _, acc := range accounts {
@@ -272,7 +297,7 @@ func createAccountsMarkup(accounts []*investapi.Account) tgbotapi.InlineKeyboard
 	return tgbotapi.NewInlineKeyboardMarkup(accRows...)
 }
 
-// Создаем сообщение с кнопкой [Приостановить]
+// Сообщение с кнопкой [Приостановить]
 func createStopButtonMarkup() any {
 	return tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
@@ -281,11 +306,14 @@ func createStopButtonMarkup() any {
 	)
 }
 
-// Создаем сообщение с кнопкой [Продолжить]
+// Сообщение с кнопками [Продолжить] \n [Выбрать другой счет]
 func createContinueButtonMarkup() any {
 	return tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(entity.ContinueButton, entity.ContinueButtonCommand),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(entity.AccountsButton, entity.AccountsButtonCommand),
 		),
 	)
 }

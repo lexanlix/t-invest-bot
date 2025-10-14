@@ -58,7 +58,8 @@ func (r *TgRepository) SendOperations(operations []entity.Operation) error {
 }
 
 func formatMoney(v *investapi.MoneyValue) string {
-	return fmt.Sprintf("%d.%s %s", v.GetUnits(), formatNano(v.GetNano(), v.GetNano() < 0), v.GetCurrency())
+	currency := entity.LabelByCode(v.GetCurrency())
+	return fmt.Sprintf("%d.%s %s", v.GetUnits(), formatNano(v.GetNano(), v.GetNano() < 0), currency)
 }
 
 //nolint:mnd

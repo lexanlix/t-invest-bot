@@ -60,6 +60,15 @@ func (s *Service) PauseTracing() {
 	s.logger.Info(s.cancelCtx, "paused tracing account", log.String("accountId", s.accountId))
 }
 
+func (s *Service) GetAccounts() ([]*pb.Account, error) {
+	accounts, err := s.investRepo.GetUserAccounts()
+	if err != nil {
+		return nil, errors.WithMessage(err, "get user accounts")
+	}
+
+	return accounts, nil
+}
+
 func (s *Service) FetchOperations() error {
 	req := &investgo.GetOperationsRequest{
 		AccountId: s.accountId,
