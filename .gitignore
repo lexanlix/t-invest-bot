@@ -79,6 +79,8 @@ conf/config_dev.yml
 .DS_Store
 /aes192.key
 /key.txt
-/test_data.json
-/users.json
+/data/test_data.json
+/data/users.json
 /.env
+/data/test_data.json
+/data/users.json

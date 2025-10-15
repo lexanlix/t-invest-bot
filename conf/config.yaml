@@ -13,4 +13,4 @@ TgBot:
   Debug: false
 Cache:
   Filepath: data/users.json
-OperationsTimeout: 60s
+OperationsTimeout: 120s

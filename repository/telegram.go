@@ -48,6 +48,11 @@ func (r *TgRepository) SendOperations(operations []entity.Operation) error {
 
 		opMsg += fmt.Sprintf("\nДата операции: %s", op.Date.AsTime().Local().Format("2006-01-02 15:04:05"))
 
+		state := mapState(op.GetState())
+		if len(state) != 0 {
+			opMsg += fmt.Sprintf("\nСтатус: %s", state)
+		}
+
 		msg += "\n" + opMsg + "\n"
 	}
 
@@ -76,4 +81,19 @@ func formatNano(nano int32, isNeg bool) string {
 	}
 
 	return strNano[:2]
+}
+
+func mapState(state investapi.OperationState) string {
+	switch state {
+	case investapi.OperationState_OPERATION_STATE_UNSPECIFIED:
+		return "Не определен"
+	case investapi.OperationState_OPERATION_STATE_EXECUTED:
+		return "Исполнена"
+	case investapi.OperationState_OPERATION_STATE_CANCELED:
+		return "Отменена"
+	case investapi.OperationState_OPERATION_STATE_PROGRESS:
+		return "Исполняется"
+	}
+
+	return ""
 }

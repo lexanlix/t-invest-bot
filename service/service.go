@@ -12,9 +12,6 @@ import (
 	pb "github.com/russianinvestments/invest-api-go-sdk/proto"
 )
 
-// Вынести потом в параметры регистрации в боте
-const defaultTimeout = 1 * time.Minute
-
 type Repository interface {
 	GetUserAccounts() ([]*pb.Account, error)
 	GetLastOperations(req *investgo.GetOperationsRequest) ([]*pb.Operation, error)
@@ -72,8 +69,8 @@ func (s *Service) GetAccounts() ([]*pb.Account, error) {
 func (s *Service) FetchOperations() error {
 	req := &investgo.GetOperationsRequest{
 		AccountId: s.accountId,
-		State:     pb.OperationState_OPERATION_STATE_EXECUTED,
-		From:      time.Now().Add(-defaultTimeout),
+		State:     pb.OperationState_OPERATION_STATE_UNSPECIFIED,
+		From:      time.Now().Add(-s.checkOperationsPeriod),
 		To:        time.Now(),
 	}
 
