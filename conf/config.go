@@ -1,5 +1,5 @@
 //nolint:tagliatelle
-package entity
+package conf
 
 import (
 	"os"

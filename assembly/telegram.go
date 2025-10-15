@@ -3,6 +3,7 @@ package assembly
 import (
 	"context"
 
+	"t-api/conf"
 	"t-api/entity"
 	"t-api/internal/log"
 	"t-api/repository"
@@ -16,11 +17,11 @@ import (
 type Telegram struct {
 	logger     log.Logger
 	bot        *tgbotapi.BotAPI
-	config     entity.Config
+	config     conf.Config
 	usersCache *Cache
 }
 
-func NewTelegram(ctx context.Context, logger log.Logger, config entity.Config, bot *tgbotapi.BotAPI) (*Telegram, error) {
+func NewTelegram(ctx context.Context, logger log.Logger, config conf.Config, bot *tgbotapi.BotAPI) (*Telegram, error) {
 	cache, err := NewCache(config.Cache.Filepath, config.AesKey)
 	if err != nil {
 		return nil, errors.WithMessage(err, "create cache")

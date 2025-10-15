@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"os"
 
-	"t-api/entity"
+	"t-api/conf"
 	"t-api/internal/log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -20,7 +20,7 @@ const (
 //nolint:containedctx
 type Bootstrap struct {
 	ctx     context.Context
-	config  *entity.Config
+	config  *conf.Config
 	logger  *log.Adapter
 	bot     *tgbotapi.BotAPI
 	updates tgbotapi.UpdatesChannel
@@ -30,7 +30,7 @@ type Bootstrap struct {
 }
 
 func NewBootstrap() *Bootstrap {
-	config, err := entity.ReadConfig(localConfigPath)
+	config, err := conf.ReadConfig(localConfigPath)
 	if err != nil {
 		panic(errors.WithMessage(err, "read config"))
 	}
@@ -73,7 +73,7 @@ func (b *Bootstrap) Context() context.Context {
 	return b.ctx
 }
 
-func (b *Bootstrap) Config() *entity.Config {
+func (b *Bootstrap) Config() *conf.Config {
 	return b.config
 }
 
@@ -111,7 +111,7 @@ func (b *Bootstrap) AddClosers(closers ...Closer) {
 	b.closers = append(b.closers, closers...)
 }
 
-func readAesKey(config *entity.Config) error {
+func readAesKey(config *conf.Config) error {
 	keyStr := os.Getenv("AES_KEY")
 	if len(keyStr) == 0 {
 		return errors.New("no AES_KEY env var")
