@@ -1,13 +1,10 @@
----
-name: t-api
-
 services:
   t-invest-bot:
     env_file: .env
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: ${COMPOSE_PROJECT_NAME}_t-invest-bot
+    container_name: t-invest-bot
     hostname: t-invest-bot
     pull_policy: always
     networks:
