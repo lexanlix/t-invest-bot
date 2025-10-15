@@ -9,8 +9,6 @@ on:
 env:
   GO_VERSION: v1.25
   GOLANGCI_LINT_VERSION: v2.4
-  SERVER_HOST: ${{ secrets.SERVER_HOST }}
-  SERVER_USER: ${{ secrets.SERVER_USER }}
 
 jobs:
   detect-modules:
@@ -66,3 +64,18 @@ jobs:
           remote_host: ${{ secrets.SERVER_HOST }}
           remote_user: ${{ secrets.SERVER_USER }}
           remote_key: ${{ secrets.REMOTE_PRIVATE_KEY }}
+
+  run:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: start docker-compose
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          port: 22
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.REMOTE_PRIVATE_KEY }}
+          script: |
+            cd /opt/t-invest-bot
+            docker-compose up --build -d -e BOT_TOKEN=${{ secrets.BOT_TOKEN }} AES_KEY=${{ secrets.AES_KEY }}
