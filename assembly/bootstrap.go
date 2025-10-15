@@ -17,7 +17,6 @@ const (
 	botGetUpdatesTimeout = 60
 )
 
-//nolint:containedctx
 type Bootstrap struct {
 	ctx     context.Context
 	config  *conf.Config
