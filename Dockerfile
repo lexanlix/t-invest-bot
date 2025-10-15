@@ -22,6 +22,10 @@ RUN adduser \
     --uid "${UID}" \
     appuser
 
+RUN mkdir -p /app/data
+RUN chown  appuser:appuser /app/data
+VOLUME /app/data
+
 USER appuser
 
 WORKDIR /app
