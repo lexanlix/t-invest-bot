@@ -1,5 +1,5 @@
 ---
-name: "t-api"
+name: t-api
 
 services:
   t-invest-bot:

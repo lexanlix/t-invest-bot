@@ -78,4 +78,5 @@ jobs:
           key: ${{ secrets.REMOTE_PRIVATE_KEY }}
           script: |
             cd /opt/t-invest-bot
+            cp /opt/t-invest-bot-env/.env .
             docker-compose up --build -d
